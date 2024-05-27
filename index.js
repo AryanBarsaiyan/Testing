@@ -27,7 +27,7 @@ const Webhook = mongoose.model('Webhook', webhookSchema);
 app.use(express.json());
 
 app.post('/webhook', async (request, response) => {
-    const data = request.body;
+    const data = request.body.data;
 
     try {
         data=data.data;
