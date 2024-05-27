@@ -21,22 +21,27 @@ db.once('open', function() {
 });
 
 // Define a schema and model for the data (no specific schema)
-const webhookSchema = new mongoose.Schema({}, { strict: false });
+const webhookSchema = new mongoose.Schema({
+    data: {
+        type: [mongoose.Schema.Types.Mixed], // This allows an array of any type of objects
+        required: true
+    }
+}, { strict: false });
+
 const Webhook = mongoose.model('Webhook', webhookSchema);
 
 app.use(express.json());
 
 app.post('/webhook', async (request, response) => {
-    const data = request.body.data;
+    const result = request.body;
 
-    try {
-        data.forEach(async (element) => {
-            const webhookEntry = new Webhook(element);
-            await webhookEntry.save();
-            console.log('Data saved successfully:', element);
-        });
-        response.status(200).send('Data received');
-    } catch (err) {
+    try{
+        const webhook = new Webhook(result);
+        await webhook.save();
+        console.log('Data saved to database:', result);
+        response.status(201).send('Data saved to database');
+    
+    }catch(err){
         console.error('Error saving to database:', err);
         response.status(500).send('Internal Server Error');
     }
