@@ -39,7 +39,8 @@ app.post('/webhook', async (request, response) => {
         //itetrate ove result.array and save each object to database
         for(let i=0;i<result.data.length;i++){
             console.log('Saving data:', result.data[i]);
-            const webhook = new Webhook({ data: result.data[i] });
+            // result.data[i] is the object so save directly
+            const webhook = new Webhook(result.data[i]);
             await webhook.save();
         }
         console.log('Data saved successfully');
