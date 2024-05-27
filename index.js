@@ -37,14 +37,12 @@ app.post('/webhook', async (request, response) => {
 
     try{
         //itetrate ove result.array and save each object to database
-        for (let i = 0; i < result.length; i++) {
-            const webhook = new Webhook({
-                data: result[i]
-            });
+        for(let i=0;i<result.data.length;i++){
+            console.log('Saving data:', result.data[i]);
+            const webhook = new Webhook({ data: result.data[i] });
             await webhook.save();
         }
-        console.log('Data saved to database');
-        response.status(201).send('Data saved to database');
+        console.log('Data saved successfully');
     }catch(err){
         console.error('Error saving to database:', err);
         response.status(500).send('Internal Server Error');
