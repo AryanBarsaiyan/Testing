@@ -30,9 +30,12 @@ app.post('/webhook', async (request, response) => {
     const data = request.body;
 
     try {
-        const webhookEntry = new Webhook(data);
-        await webhookEntry.save();
-        console.log('Data saved successfully:', data);
+        
+        data.forEach(async (element) => {
+            const webhookEntry = new Webhook(element);
+            await webhookEntry.save();
+            console.log('Data saved successfully:', element);
+        });
         response.status(200).send('Data received');
     } catch (err) {
         console.error('Error saving to database:', err);
