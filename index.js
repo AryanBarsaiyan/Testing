@@ -30,7 +30,7 @@ app.post('/webhook', async (request, response) => {
     const data = request.body;
 
     try {
-        
+        data=data.data;
         data.forEach(async (element) => {
             const webhookEntry = new Webhook(element);
             await webhookEntry.save();
