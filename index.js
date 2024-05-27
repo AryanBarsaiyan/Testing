@@ -26,57 +26,55 @@ const Webhook = mongoose.model('Webhook', webhookSchema);
 
 app.use(express.json());
 
-app.post('/webhook', (request, response) => {
+app.post('/webhook', async (request, response) => {
     const data = request.body;
 
-    // Save the data to the database
-    const webhookEntry = new Webhook(data);
-    webhookEntry.save((err) => {
-        if (err) {
-            console.error('Error saving to database:', err);
-            response.status(500).send('Internal Server Error');
-        } else {
-            console.log('Data saved successfully:', data);
-            response.status(200).send('Data received');
-        }
-    });
+    try {
+        const webhookEntry = new Webhook(data);
+        await webhookEntry.save();
+        console.log('Data saved successfully:', data);
+        response.status(200).send('Data received');
+    } catch (err) {
+        console.error('Error saving to database:', err);
+        response.status(500).send('Internal Server Error');
+    }
 });
 
 app.get('/webhook', (request, response) => {
     response.status(200).send('Webhook endpoint');
 });
 
-app.post('/webhook-test', (request, response) => {
+app.post('/webhook-test', async (request, response) => {
     const data = request.body;
     // check user name:aryan and password:1234
-    if(data.username == process.env.USERNAME && data.password == process.env.PASSWORD){
-        //return the data from the database
-        Webhook.find({}, (err, data) => {
-            if (err) {
-                console.error('Error reading from database:', err);
-                response.status(500).send('Internal Server Error');
-            } else {
-                console.log('Data read successfully:', data);
-                response.status(200).send(data);
-            }
-        });
+    if (data.username == process.env.USERNAME && data.password == process.env.PASSWORD) {
+        try {
+            const dbData = await Webhook.find({});
+            console.log('Data read successfully:', dbData);
+            response.status(200).send(dbData);
+        } catch (err) {
+            console.error('Error reading from database:', err);
+            response.status(500).send('Internal Server Error');
+        }
+    } else {
+        response.status(401).send('Unauthorized');
     }
 });
 
-app.post('/clear', (request, response) => {
+app.post('/clear', async (request, response) => {
     const data = request.body;
     // check user name:aryan and password:1234
-    if(data.username == process.env.USERNAME && data.password == process.env.PASSWORD){
-        //clear the database
-        Webhook.deleteMany({}, (err) => {
-            if (err) {
-                console.error('Error clearing database:', err);
-                response.status(500).send('Internal Server Error');
-            } else {
-                console.log('Database cleared');
-                response.status(200).send('Database cleared');
-            }
-        });
+    if (data.username == process.env.USERNAME && data.password == process.env.PASSWORD) {
+        try {
+            await Webhook.deleteMany({});
+            console.log('Database cleared');
+            response.status(200).send('Database cleared');
+        } catch (err) {
+            console.error('Error clearing database:', err);
+            response.status(500).send('Internal Server Error');
+        }
+    } else {
+        response.status(401).send('Unauthorized');
     }
 });
 
