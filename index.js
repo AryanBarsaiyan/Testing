@@ -20,12 +20,9 @@ db.once('open', function() {
     console.log('Connected to MongoDB Atlas');
 });
 
-// Define a schema and model for the data (no specific schema)
+// Define a schema and model for individual webhook data
 const webhookSchema = new mongoose.Schema({
-    data: {
-        type: [mongoose.Schema.Types.Mixed], // This allows an array of any type of objects
-        required: true
-    }
+    data: mongoose.Schema.Types.Mixed // This allows any type of object
 }, { strict: false });
 
 const Webhook = mongoose.model('Webhook', webhookSchema);
@@ -35,16 +32,16 @@ app.use(express.json());
 app.post('/webhook', async (request, response) => {
     const result = request.body;
 
-    try{
-        //itetrate ove result.array and save each object to database
-        for(let i=0;i<result.data.length;i++){
+    try {
+        // Iterate over result.data and save each object to the database as a separate document
+        for (let i = 0; i < result.data.length; i++) {
             console.log('Saving data:', result.data[i]);
-            // result.data[i] is the object so save directly
-            const webhook = new Webhook(result.data[i]);
+            const webhook = new Webhook({ data: result.data[i] });
             await webhook.save();
         }
         console.log('Data saved successfully');
-    }catch(err){
+        response.status(200).send('Data saved successfully');
+    } catch (err) {
         console.error('Error saving to database:', err);
         response.status(500).send('Internal Server Error');
     }
@@ -56,7 +53,7 @@ app.get('/webhook', (request, response) => {
 
 app.post('/webhook-test', async (request, response) => {
     const data = request.body;
-    // check user name:aryan and password:1234
+    // Check username and password from environment variables
     if (data.username == process.env.USERNAME && data.password == process.env.PASSWORD) {
         try {
             const dbData = await Webhook.find({});
@@ -73,7 +70,7 @@ app.post('/webhook-test', async (request, response) => {
 
 app.post('/clear', async (request, response) => {
     const data = request.body;
-    // check user name:aryan and password:1234
+    // Check username and password from environment variables
     if (data.username == process.env.USERNAME && data.password == process.env.PASSWORD) {
         try {
             await Webhook.deleteMany({});
